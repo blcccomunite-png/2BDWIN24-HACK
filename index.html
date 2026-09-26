@@ -22,7 +22,7 @@
             left: 0;
         }
 
-        /* Background animated gradient (instead of iframe) */
+        /* Background animated gradient */
         #bg-screen {
             position: absolute;
             top: 0;
@@ -73,7 +73,12 @@
             align-items: center;
             color: #00ffe0;
             font-weight: 700;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #loader-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
         .spinner {
             width: 45px;
@@ -273,7 +278,7 @@
             transform: scale(0.97);
         }
 
-        /* NEW: Game open button */
+        /* Game open button */
         .btn-game {
             width: 100%;
             background: linear-gradient(135deg, #ff9500, #ff5e00);
@@ -302,7 +307,6 @@
             50% { box-shadow: 0 2px 18px rgba(255, 140, 0, 0.65); }
         }
 
-        /* Loading state */
         .btn-login:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -317,7 +321,7 @@
         <div>Loading Site...</div>
     </div>
 
-    <!-- Animated Background (replaces iframe) -->
+    <!-- Animated Background -->
     <div id="bg-screen">
         <div class="bg-hint">🎮 গেম খেলতে নিচের বাটনে ক্লিক করুন</div>
     </div>
@@ -326,7 +330,6 @@
         <canvas id="neon-canvas" style="position:absolute;inset:-3px;border-radius:17px;pointer-events:none;z-index:2;"></canvas>
 
         <div id="overlay-box">
-            <!-- Titles -->
             <div class="title-main">𝐉𝐈𝐒𝐀𝐍 𝐁𝐋𝐂𝐂 𝐖𝐎𝐍𝐄𝐑</div>
             <div class="title-sub">[AURA]➤𝐉𝐈𝐒𝐀𝐍</div>
 
@@ -348,7 +351,7 @@
                 </div>
             </div>
 
-            <!-- GAME BUTTON (NEW) -->
+            <!-- GAME BUTTON -->
             <a class="btn-game" href="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web" target="_blank">
                 🎮 গেম খেলুন (Game Start)
             </a>
@@ -361,20 +364,24 @@
     </div>
 
     <script>
-        // Hide loading screen
+        // ── Hide loader (fixed) ──
         function hideLoader() {
             const loader = document.getElementById('loader-screen');
             if (loader) {
-                loader.style.opacity = '0';
-                loader.style.visibility = 'hidden';
+                loader.classList.add('hidden');
             }
         }
 
-        // Hide loader after page ready (1 sec)
-        window.addEventListener('load', () => setTimeout(hideLoader, 800));
-        setTimeout(hideLoader, 2500);
+        // Fire hideLoader immediately + fallback
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(hideLoader, 300);
+        });
+        window.addEventListener('load', () => {
+            setTimeout(hideLoader, 200);
+        });
+        setTimeout(hideLoader, 800);   // hard fallback: 0.8 sec e hide
 
-        // Manual password setting
+        // ── Password & session ──
         const MANUAL_PASSWORD = "JISAN55667";
 
         // Check saved session on page load
@@ -717,6 +724,5 @@
             document.removeEventListener('touchend', stopDrag);
         }
     </script>
-
 
 </body></html>
