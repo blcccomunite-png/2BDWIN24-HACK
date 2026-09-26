@@ -22,18 +22,30 @@
             left: 0;
         }
 
-        /* Background animated gradient */
-        #bg-screen {
+        /* ── Game iframe (full screen background) ── */
+        #game-frame {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
             z-index: 1;
+            background: #000;
+        }
+
+        /* ── Fallback animated background (shows if iframe blocked) ── */
+        #bg-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
             background: radial-gradient(ellipse at 30% 20%, #1a0d3d 0%, #0a0618 45%, #000 100%);
             overflow: hidden;
         }
-        #bg-screen::before {
+        #bg-fallback::before {
             content: '';
             position: absolute;
             inset: -50%;
@@ -43,21 +55,8 @@
         @keyframes rotateBg {
             to { transform: rotate(360deg); }
         }
-        .bg-hint {
-            position: absolute;
-            bottom: 22px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #3a3a5e;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            z-index: 2;
-            pointer-events: none;
-        }
 
-        /* Loader Overlay */
+        /* ── Loader ── */
         #loader-screen {
             position: fixed;
             top: 0;
@@ -94,6 +93,7 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* ── Floating prediction box ── */
         #overlay-wrapper {
             position: fixed;
             top: 50%;
@@ -278,7 +278,7 @@
             transform: scale(0.97);
         }
 
-        /* Game open button */
+        /* ── Game open button ── */
         .btn-game {
             width: 100%;
             background: linear-gradient(135deg, #ff9500, #ff5e00);
@@ -315,17 +315,23 @@
 </head>
 <body>
 
+    <!-- Fallback animated background (behind iframe) -->
+    <div id="bg-fallback"></div>
+
+    <!-- Full screen game iframe -->
+    <iframe id="game-frame"
+            src="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            onload="onGameLoaded()"></iframe>
+
     <!-- Loader Screen -->
     <div id="loader-screen">
         <div class="spinner"></div>
         <div>Loading Site...</div>
     </div>
 
-    <!-- Animated Background -->
-    <div id="bg-screen">
-        <div class="bg-hint">🎮 গেম খেলতে নিচের বাটনে ক্লিক করুন</div>
-    </div>
-
+    <!-- Floating prediction box -->
     <div id="overlay-wrapper">
         <canvas id="neon-canvas" style="position:absolute;inset:-3px;border-radius:17px;pointer-events:none;z-index:2;"></canvas>
 
@@ -351,12 +357,12 @@
                 </div>
             </div>
 
-            <!-- GAME BUTTON -->
+            <!-- GAME BUTTON (fallback if iframe doesn't load) -->
             <a class="btn-game" href="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web" target="_blank">
                 🎮 গেম খেলুন (Game Start)
             </a>
 
-            <!-- Telegram button -->
+            <!-- Telegram -->
             <a class="btn-telegram" href="https://t.me/DSK_QUASARS" target="_blank">
                 📢 পাসওয়ার্ড নিতে চান
             </a>
@@ -364,35 +370,27 @@
     </div>
 
     <script>
-        // ── Hide loader (fixed) ──
+        // ── Loader hide ──
         function hideLoader() {
             const loader = document.getElementById('loader-screen');
-            if (loader) {
-                loader.classList.add('hidden');
-            }
+            if (loader) loader.classList.add('hidden');
         }
-
-        // Fire hideLoader immediately + fallback
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(hideLoader, 300);
-        });
-        window.addEventListener('load', () => {
-            setTimeout(hideLoader, 200);
-        });
-        setTimeout(hideLoader, 800);   // hard fallback: 0.8 sec e hide
+        function onGameLoaded() {
+            // iframe loaded (or attempted) — hide loader
+            setTimeout(hideLoader, 400);
+        }
+        document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 500));
+        window.addEventListener('load', () => setTimeout(hideLoader, 300));
+        setTimeout(hideLoader, 1500); // hard fallback
 
         // ── Password & session ──
         const MANUAL_PASSWORD = "JISAN55667";
 
-        // Check saved session on page load
         window.addEventListener('load', () => {
             const isLogged = localStorage.getItem('sureshot_logged_in');
-            if (isLogged === 'true') {
-                showPrediction();
-            }
+            if (isLogged === 'true') showPrediction();
         });
 
-        // ── Login Action ──
         function doLogin() {
             const pw = document.getElementById('pw-input').value.trim();
             if (!pw) { shake(); return; }
@@ -430,7 +428,6 @@
             setTimeout(() => inp.style.borderColor = '#3a3a5e', 1500);
         }
 
-        // ── Show prediction panel ──
         function showPrediction() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('pred-section').style.display = 'block';
