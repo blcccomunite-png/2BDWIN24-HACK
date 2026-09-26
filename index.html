@@ -22,41 +22,27 @@
             left: 0;
         }
 
-        /* ── Game iframe (full screen background) ── */
-        #game-frame {
+        /* Responsive Frame Container to fix zoom & scroll issues */
+        #site-frame-wrapper {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            z-index: 1;
+            overflow: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #site-frame {
             width: 100%;
             height: 100%;
             border: none;
-            z-index: 1;
-            background: #000;
+            display: block;
         }
 
-        /* ── Fallback animated background (shows if iframe blocked) ── */
-        #bg-fallback {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            background: radial-gradient(ellipse at 30% 20%, #1a0d3d 0%, #0a0618 45%, #000 100%);
-            overflow: hidden;
-        }
-        #bg-fallback::before {
-            content: '';
-            position: absolute;
-            inset: -50%;
-            background: conic-gradient(from 0deg, transparent, rgba(0,255,224,0.06), transparent 30%, rgba(255,0,204,0.06), transparent 60%, rgba(123,47,255,0.06), transparent);
-            animation: rotateBg 25s linear infinite;
-        }
-        @keyframes rotateBg {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ── Loader ── */
+        /* Loader Overlay while waiting for site to load */
         #loader-screen {
             position: fixed;
             top: 0;
@@ -72,12 +58,7 @@
             align-items: center;
             color: #00ffe0;
             font-weight: 700;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-        #loader-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
         }
         .spinner {
             width: 45px;
@@ -89,11 +70,14 @@
             margin-bottom: 15px;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        /* ── Floating prediction box ── */
         #overlay-wrapper {
             position: fixed;
             top: 50%;
@@ -269,7 +253,6 @@
             text-align: center;
             transition: opacity 0.2s, transform 0.1s;
             box-shadow: 0 2px 8px rgba(0, 100, 255, 0.18);
-            margin-bottom: 7px;
         }
         .btn-telegram:hover {
             opacity: 0.88;
@@ -278,35 +261,7 @@
             transform: scale(0.97);
         }
 
-        /* ── Game open button ── */
-        .btn-game {
-            width: 100%;
-            background: linear-gradient(135deg, #ff9500, #ff5e00);
-            color: #fff;
-            font-weight: 800;
-            font-size: 12.5px;
-            border: none;
-            border-radius: 8px;
-            padding: 9px;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            transition: opacity 0.2s, transform 0.1s;
-            box-shadow: 0 2px 10px rgba(255, 120, 0, 0.30);
-            animation: pulseGame 2s ease-in-out infinite;
-        }
-        .btn-game:hover {
-            opacity: 0.90;
-        }
-        .btn-game:active {
-            transform: scale(0.97);
-        }
-        @keyframes pulseGame {
-            0%, 100% { box-shadow: 0 2px 10px rgba(255, 120, 0, 0.30); }
-            50% { box-shadow: 0 2px 18px rgba(255, 140, 0, 0.65); }
-        }
-
+        /* Loading state */
         .btn-login:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -315,27 +270,22 @@
 </head>
 <body>
 
-    <!-- Fallback animated background (behind iframe) -->
-    <div id="bg-fallback"></div>
-
-    <!-- Full screen game iframe -->
-    <iframe id="game-frame"
-            src="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web"
-            allowfullscreen
-            referrerpolicy="no-referrer-when-downgrade"
-            onload="onGameLoaded()"></iframe>
-
     <!-- Loader Screen -->
     <div id="loader-screen">
         <div class="spinner"></div>
         <div>Loading Site...</div>
     </div>
 
-    <!-- Floating prediction box -->
+    <!-- Fullscreen Frame Wrapper -->
+    <div id="site-frame-wrapper">
+        <iframe id="site-frame" src="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web" onload="hideLoader()"></iframe>
+    </div>
+
     <div id="overlay-wrapper">
         <canvas id="neon-canvas" style="position:absolute;inset:-3px;border-radius:17px;pointer-events:none;z-index:2;"></canvas>
 
         <div id="overlay-box">
+            <!-- Titles -->
             <div class="title-main">𝐉𝐈𝐒𝐀𝐍 𝐁𝐋𝐂𝐂 𝐖𝐎𝐍𝐄𝐑</div>
             <div class="title-sub">[AURA]➤𝐉𝐈𝐒𝐀𝐍</div>
 
@@ -357,12 +307,7 @@
                 </div>
             </div>
 
-            <!-- GAME BUTTON (fallback if iframe doesn't load) -->
-            <a class="btn-game" href="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web" target="_blank">
-                🎮 গেম খেলুন (Game Start)
-            </a>
-
-            <!-- Telegram -->
+            <!-- Telegram button -->
             <a class="btn-telegram" href="https://t.me/DSK_QUASARS" target="_blank">
                 📢 পাসওয়ার্ড নিতে চান
             </a>
@@ -370,27 +315,30 @@
     </div>
 
     <script>
-        // ── Loader hide ──
+        // Hide loading screen once iframe is loaded or after timeout
         function hideLoader() {
             const loader = document.getElementById('loader-screen');
-            if (loader) loader.classList.add('hidden');
+            if (loader) {
+                loader.style.opacity = '0';
+                loader.style.visibility = 'hidden';
+            }
         }
-        function onGameLoaded() {
-            // iframe loaded (or attempted) — hide loader
-            setTimeout(hideLoader, 400);
-        }
-        document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 500));
-        window.addEventListener('load', () => setTimeout(hideLoader, 300));
-        setTimeout(hideLoader, 1500); // hard fallback
 
-        // ── Password & session ──
+        // Fallback loader hide (after 2.5 seconds max)
+        setTimeout(hideLoader, 2500);
+
+        // Manual password setting
         const MANUAL_PASSWORD = "JISAN55667";
 
+        // Check saved session on page load
         window.addEventListener('load', () => {
             const isLogged = localStorage.getItem('sureshot_logged_in');
-            if (isLogged === 'true') showPrediction();
+            if (isLogged === 'true') {
+                showPrediction();
+            }
         });
 
+        // ── Login Action ──
         function doLogin() {
             const pw = document.getElementById('pw-input').value.trim();
             if (!pw) { shake(); return; }
@@ -428,6 +376,7 @@
             setTimeout(() => inp.style.borderColor = '#3a3a5e', 1500);
         }
 
+        // ── Show prediction panel ──
         function showPrediction() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('pred-section').style.display = 'block';
@@ -721,5 +670,6 @@
             document.removeEventListener('touchend', stopDrag);
         }
     </script>
+
 
 </body></html>
