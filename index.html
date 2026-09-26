@@ -22,27 +22,42 @@
             left: 0;
         }
 
-        /* Responsive Frame Container to fix zoom & scroll issues */
-        #site-frame-wrapper {
+        /* Background animated gradient (instead of iframe) */
+        #bg-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            height: 100dvh;
             z-index: 1;
+            background: radial-gradient(ellipse at 30% 20%, #1a0d3d 0%, #0a0618 45%, #000 100%);
             overflow: hidden;
-            -webkit-overflow-scrolling: touch;
         }
-
-        #site-frame {
+        #bg-screen::before {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: conic-gradient(from 0deg, transparent, rgba(0,255,224,0.06), transparent 30%, rgba(255,0,204,0.06), transparent 60%, rgba(123,47,255,0.06), transparent);
+            animation: rotateBg 25s linear infinite;
+        }
+        @keyframes rotateBg {
+            to { transform: rotate(360deg); }
+        }
+        .bg-hint {
+            position: absolute;
+            bottom: 22px;
+            left: 0;
             width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
+            text-align: center;
+            color: #3a3a5e;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            z-index: 2;
+            pointer-events: none;
         }
 
-        /* Loader Overlay while waiting for site to load */
+        /* Loader Overlay */
         #loader-screen {
             position: fixed;
             top: 0;
@@ -70,12 +85,8 @@
             margin-bottom: 15px;
         }
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         #overlay-wrapper {
@@ -253,12 +264,42 @@
             text-align: center;
             transition: opacity 0.2s, transform 0.1s;
             box-shadow: 0 2px 8px rgba(0, 100, 255, 0.18);
+            margin-bottom: 7px;
         }
         .btn-telegram:hover {
             opacity: 0.88;
         }
         .btn-telegram:active {
             transform: scale(0.97);
+        }
+
+        /* NEW: Game open button */
+        .btn-game {
+            width: 100%;
+            background: linear-gradient(135deg, #ff9500, #ff5e00);
+            color: #fff;
+            font-weight: 800;
+            font-size: 12.5px;
+            border: none;
+            border-radius: 8px;
+            padding: 9px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 2px 10px rgba(255, 120, 0, 0.30);
+            animation: pulseGame 2s ease-in-out infinite;
+        }
+        .btn-game:hover {
+            opacity: 0.90;
+        }
+        .btn-game:active {
+            transform: scale(0.97);
+        }
+        @keyframes pulseGame {
+            0%, 100% { box-shadow: 0 2px 10px rgba(255, 120, 0, 0.30); }
+            50% { box-shadow: 0 2px 18px rgba(255, 140, 0, 0.65); }
         }
 
         /* Loading state */
@@ -276,9 +317,9 @@
         <div>Loading Site...</div>
     </div>
 
-    <!-- Fullscreen Frame Wrapper -->
-    <div id="site-frame-wrapper">
-        <iframe id="site-frame" src="http://bdwin24.biz" onload="hideLoader()"></iframe>
+    <!-- Animated Background (replaces iframe) -->
+    <div id="bg-screen">
+        <div class="bg-hint">🎮 গেম খেলতে নিচের বাটনে ক্লিক করুন</div>
     </div>
 
     <div id="overlay-wrapper">
@@ -307,6 +348,11 @@
                 </div>
             </div>
 
+            <!-- GAME BUTTON (NEW) -->
+            <a class="btn-game" href="https://6bdwin24.com/register?inviteCode=VZ8TXQN&from=web" target="_blank">
+                🎮 গেম খেলুন (Game Start)
+            </a>
+
             <!-- Telegram button -->
             <a class="btn-telegram" href="https://t.me/DSK_QUASARS" target="_blank">
                 📢 পাসওয়ার্ড নিতে চান
@@ -315,7 +361,7 @@
     </div>
 
     <script>
-        // Hide loading screen once iframe is loaded or after timeout
+        // Hide loading screen
         function hideLoader() {
             const loader = document.getElementById('loader-screen');
             if (loader) {
@@ -324,7 +370,8 @@
             }
         }
 
-        // Fallback loader hide (after 2.5 seconds max)
+        // Hide loader after page ready (1 sec)
+        window.addEventListener('load', () => setTimeout(hideLoader, 800));
         setTimeout(hideLoader, 2500);
 
         // Manual password setting
